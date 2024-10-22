@@ -1,22 +1,29 @@
-package com.example.student_login
+package com.example.student_login.screens
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.*
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.*
 import com.example.student_login.ui.theme.StudentloginTheme
+import com.example.student_login.viewModel.TopicViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.student_login.model.Entity
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun StudentDashboard(modifier: Modifier) {
+fun StudentDashboard(modifier: Modifier = Modifier) {
+
+    val topicViewModel: TopicViewModel = viewModel()
+    val topics = topicViewModel.topics.collectAsState()
+    val totalTopics = topicViewModel.totalTopics.collectAsState()
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -28,21 +35,33 @@ fun StudentDashboard(modifier: Modifier) {
             )
         },
         content = { paddingValues ->
-            Column (
+            LazyColumn(
                 modifier = modifier
                     .padding(paddingValues)
                     .padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                TitleCard(title= "Topics")
-                DashboardCard(title = "Attendance", subtitle = "90% this month")
-                DashboardCard(title = "Grades", subtitle = "GPA: 3.8/4.0")
-                DashboardCard(title = "Upcoming Exams", subtitle = "Math, Physics")
+                item {
+                    TitleCard(title = "Topics")
+                }
+
+               item {
+                   topics.value.forEach { topic ->
+                       DashboardCard(
+                           title = topic.subject,
+                           subtitle = topic.description
+                       )
+                       Spacer(
+                           modifier = Modifier.height(8.dp)
+                       )
+                   }
+               }
             }
         }
     )
 }
+
 
 @Composable
 fun TitleCard(title: String) {
