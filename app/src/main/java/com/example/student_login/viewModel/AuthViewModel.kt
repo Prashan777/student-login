@@ -2,6 +2,7 @@ package com.example.student_login.viewModel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.student_login.model.Credentials
 import com.example.student_login.repository.AuthRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.StateFlow
@@ -16,9 +17,14 @@ class AuthViewModel @Inject constructor(private var repository: AuthRepository) 
     val keyPass: StateFlow<String>
         get() = repository.keyPass
 
-    init {
-        viewModelScope.launch {
+    val errorMessage: StateFlow<String>
+        get() = repository.errorMessage
 
-        }
+
+
+    public fun login(credentials: Credentials) {
+       viewModelScope.launch {
+               repository.login(credentials)
+       }
     }
 }

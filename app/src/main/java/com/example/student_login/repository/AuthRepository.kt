@@ -1,5 +1,6 @@
 package com.example.student_login.repository
 
+import android.util.Log
 import com.example.student_login.api.VuAPI
 import com.example.student_login.model.Credentials
 import com.example.student_login.model.Entity
@@ -17,11 +18,22 @@ class AuthRepository @Inject constructor( private var vuAPI: VuAPI) {
     val keyPass: StateFlow<String>
         get() = _keypass
 
+    private var  _errorMessage = MutableStateFlow<String>("")
+    val errorMessage: StateFlow<String>
+        get() = _errorMessage
+
     suspend fun login(credentials: Credentials){
+        _errorMessage.value = ""
         var response = vuAPI.login(credentials);
         if (response.isSuccessful && response.body() != null) {
-            _isLoggedIn.emit(true)
+
+            if (response.code() != 200) {
+                _errorMessage.emit("Username or password do not match")
+            }
             _keypass.emit(response.body()?.keypass!!)
+            _isLoggedIn.emit(true)
+        } else {
+            _errorMessage.emit("Username or password do not match")
         }
     }
 }

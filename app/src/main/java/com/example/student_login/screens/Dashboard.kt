@@ -1,5 +1,6 @@
 package com.example.student_login.screens
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.*
@@ -10,19 +11,23 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.*
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.student_login.ui.theme.StudentloginTheme
 import com.example.student_login.viewModel.TopicViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.student_login.model.Entity
+import com.example.student_login.viewModel.AuthViewModel
+import javax.security.auth.Subject
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun StudentDashboard(modifier: Modifier = Modifier) {
+fun StudentDashboard(modifier: Modifier = Modifier, onClick :(subject: String) -> Unit ) {
 
-    val topicViewModel: TopicViewModel = viewModel()
+    val topicViewModel: TopicViewModel = hiltViewModel()
     val topics = topicViewModel.topics.collectAsState()
     val totalTopics = topicViewModel.totalTopics.collectAsState()
+
 
     Scaffold(
         topBar = {
@@ -43,14 +48,15 @@ fun StudentDashboard(modifier: Modifier = Modifier) {
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 item {
-                    TitleCard(title = "Topics")
+                    TitleCard("Topics")
                 }
 
                item {
                    topics.value.forEach { topic ->
                        DashboardCard(
                            title = topic.subject,
-                           subtitle = topic.description
+                           subtitle = topic.description,
+                           onClick = onClick
                        )
                        Spacer(
                            modifier = Modifier.height(8.dp)
@@ -84,9 +90,12 @@ fun TitleCard(title: String) {
 }
 
 @Composable
-fun DashboardCard(title: String, subtitle: String) {
+fun DashboardCard(title: String, subtitle: String, onClick :(subject: String) -> Unit ) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth()
+            .clickable {
+                onClick(title);
+            },
         shape = MaterialTheme.shapes.medium,
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
     ) {
@@ -94,13 +103,5 @@ fun DashboardCard(title: String, subtitle: String) {
             Text(text = title, fontWeight = FontWeight.Bold, fontSize = 18.sp)
             Text(text = subtitle, fontSize = 16.sp)
         }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun DefaultPreview() {
-    StudentloginTheme() {
-        StudentDashboard(modifier = Modifier.padding())
     }
 }

@@ -1,5 +1,7 @@
+
 package com.example.student_login.screens
 
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -20,6 +22,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -34,18 +37,25 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.student_login.R
+import com.example.student_login.model.Credentials
+import com.example.student_login.viewModel.AuthViewModel
 
 @Composable
-fun LoginScreen() {
+fun LoginScreen(onClick :(credentials: Credentials) -> Unit) {
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
-    var isLoggedIn by remember { mutableStateOf(false) }
+    var loginError by remember { mutableStateOf("") } // To display login error message
+    var isLoading by remember { mutableStateOf(false) } // To show loading state
+
+    var authViewModel: AuthViewModel = hiltViewModel()
+
+    var errorMessage = authViewModel.errorMessage.collectAsState()
 
     Surface(
         modifier = Modifier.fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-        ,
+            .background(MaterialTheme.colorScheme.background),
         color = Color.LightGray
     ) {
         Box(
@@ -74,14 +84,24 @@ fun LoginScreen() {
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Start
                 )
-                Spacer(modifier = Modifier.height(20.dp))
+                // Show error message if there is one
+                if (loginError.isNotEmpty()) {
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Text(text = loginError, color = MaterialTheme.colorScheme.error)
+                    Spacer(modifier = Modifier.height(12.dp))
+                }
 
+                if (errorMessage.value.isNotEmpty()) {
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Text(text = errorMessage.value, color = MaterialTheme.colorScheme.error)
+                    Spacer(modifier = Modifier.height(12.dp))
+                }
                 OutlinedTextField(
                     value = username,
                     onValueChange = { username = it },
                     label = { Text("Username") },
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(50,50,50,50),
+                    shape = RoundedCornerShape(50, 50, 50, 50),
                 )
                 Spacer(modifier = Modifier.height(16.dp))
 
@@ -92,30 +112,42 @@ fun LoginScreen() {
                     visualTransformation = PasswordVisualTransformation(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(50,50,50,50)
+                    shape = RoundedCornerShape(50, 50, 50, 50)
                 )
                 Spacer(modifier = Modifier.height(16.dp))
+                // Show loading indicator if logging in
+                if (isLoading) {
+                    CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
+                } else {
+                    Button(
+                        onClick = {
+                            // Reset error message
+                            loginError = ""
+                            isLoading = true
 
-                Button(
-                    onClick = {
-                        //handle login
-                        isLoggedIn = username == "admin" && password == "password"
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.buttonColors(
-                        contentColor = MaterialTheme.colorScheme.onPrimary,
-                        containerColor = MaterialTheme.colorScheme.primary
-                    )
-                ) {
-                    Text("Login")
-                }
+                            if (username.isEmpty() || password.isEmpty()) {
+                                loginError = "Username and password cannot be empty."
+                            } else {
 
-                Spacer(modifier = Modifier.height(16.dp))
+                                val credentials = Credentials(
+                                    username = username,
+                                    password = password
+                                )
+                                onClick(credentials)
+                            }
 
-                if (isLoggedIn) {
-                    Text("Login Successful!", color = Color.Green)
-                } else if (username.isNotEmpty() && password.isNotEmpty()) {
-                    Text("Login Failed", color = Color.Red)
+                            isLoading = false
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(
+                            contentColor = MaterialTheme.colorScheme.onPrimary,
+                            containerColor = MaterialTheme.colorScheme.primary
+                        )
+                    ) {
+                        Text("Login")
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
                 }
             }
         }
