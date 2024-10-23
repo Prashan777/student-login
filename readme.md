@@ -26,7 +26,7 @@ This is a Kotlin-based Android application that provides a simple login interfac
 
 1. **Clone the repository**:
     ```bash
-    git clone https://github.com/your-repo/student_login.git
+    git clone https://github.com/Prashan777/student-login
     ```
 2. **Open the project in Android Studio**:
    - Open Android Studio and select the cloned project directory.
