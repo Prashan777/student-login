@@ -14,9 +14,8 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 class NetworkModule {
 
-//    val baseUrl: String = "https://nit3213-api-h2b3-latest.onrender.com/"
+    val baseUrl: String = "https://nit3213-api-h2b3-latest.onrender.com/"
 
-    val baseUrl: String = "http://10.0.2.2:8000"
 
     @Singleton
     @Provides
